@@ -110,6 +110,7 @@ public class TileEntityInductionCell extends TileEntityBasicBlock implements ISt
         double supply = Math.min(d, available);
         this.setEnergy(this.electricityStored - (supply * 100));
         markDirty();
+        MekanismUtils.updateBlock(world, getPos());
         return supply;
     }
 }
