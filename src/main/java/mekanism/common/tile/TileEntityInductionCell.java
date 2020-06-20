@@ -1,5 +1,6 @@
 package mekanism.common.tile;
 
+import gcewing.sg.interfaces.ISGEnergySource;
 import io.netty.buffer.ByteBuf;
 import javax.annotation.Nonnull;
 import mekanism.api.TileNetworkList;
@@ -14,7 +15,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
-public class TileEntityInductionCell extends TileEntityBasicBlock implements IStrictEnergyStorage {
+public class TileEntityInductionCell extends TileEntityBasicBlock implements IStrictEnergyStorage, ISGEnergySource {
 
     public InductionCellTier tier = InductionCellTier.BASIC;
 
@@ -91,5 +92,24 @@ public class TileEntityInductionCell extends TileEntityBasicBlock implements ISt
             return Capabilities.ENERGY_STORAGE_CAPABILITY.cast(this);
         }
         return super.getCapability(capability, facing);
+    }
+
+    @Override
+    public double availableEnergy() {
+        return getEnergy() / 100;
+    }
+
+    @Override
+    public double totalAvailableEnergy() {
+        return getEnergy();
+    }
+
+    @Override
+    public double drawEnergyDouble(double d) {
+        double available = this.electricityStored;
+        double supply = Math.min(d, available);
+        this.setEnergy(this.electricityStored - (supply * 100));
+        markDirty();
+        return supply;
     }
 }
