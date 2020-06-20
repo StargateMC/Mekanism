@@ -12,6 +12,7 @@ import mekanism.common.content.matrix.SynchronizedMatrixData;
 import mekanism.common.integration.computer.IComputerIntegration;
 import mekanism.common.multiblock.MultiblockManager;
 import mekanism.common.util.ChargeUtils;
+import gcewing.sg.interfaces.ISGEnergySource;
 import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.LangUtils;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,7 +24,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 
-public class TileEntityInductionCasing extends TileEntityMultiblock<SynchronizedMatrixData> implements IStrictEnergyStorage, IComputerIntegration {
+public class TileEntityInductionCasing extends TileEntityMultiblock<SynchronizedMatrixData> implements IStrictEnergyStorage, IComputerIntegration, ISGEnergySource {
 
     protected static final int[] CHARGE_SLOT = {0};
     protected static final int[] DISCHARGE_SLOT = {1};
@@ -207,5 +208,25 @@ public class TileEntityInductionCasing extends TileEntityMultiblock<Synchronized
             return true;
         }
         return super.isCapabilityDisabled(capability, side);
+    }
+    
+
+    @Override
+    public double availableEnergy() {
+        return getEnergy() / 100;
+    }
+
+    @Override
+    public double totalAvailableEnergy() {
+        return getEnergy();
+    }
+
+    @Override
+    public double drawEnergyDouble(double d) {
+        double available = this.getEnergy();
+        double supply = Math.min(this.getTransferCap(),Math.min(d, available));
+        this.setEnergy(this.getEnergy() - (supply * 100));
+        markDirty();
+        return supply;
     }
 }
