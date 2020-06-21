@@ -227,8 +227,8 @@ public class TileEntityInductionCasing extends TileEntityMultiblock<Synchronized
     public double drawEnergyDouble(double request) {
         double available = totalAvailableEnergy() / energyPerSGEnergyUnit;
         double requestedSupply = Math.min(request, available);
-        double supply = this.removeEnergy(requestedSupply * energyPerSGEnergyUnit, false);
+        this.setEnergy((this.getEnergy() - (requestedSupply * energyPerSGEnergyUnit)));
         markDirty();
-        return supply;
+        return requestedSupply;
     }
 }
