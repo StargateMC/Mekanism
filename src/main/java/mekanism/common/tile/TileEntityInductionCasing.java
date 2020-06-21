@@ -28,7 +28,8 @@ public class TileEntityInductionCasing extends TileEntityMultiblock<Synchronized
 
     protected static final int[] CHARGE_SLOT = {0};
     protected static final int[] DISCHARGE_SLOT = {1};
-
+    private int energyPerSGEnergyUnit = 80;
+    
     public static final String[] methods = new String[]{"getEnergy", "getMaxEnergy", "getInput", "getOutput", "getTransferCap"};
 
     public TileEntityInductionCasing() {
@@ -213,7 +214,8 @@ public class TileEntityInductionCasing extends TileEntityMultiblock<Synchronized
 
     @Override
     public double availableEnergy() {
-        return (Math.min(this.getTransferCap(),getEnergy()));
+        double available = this.getEnergy() / energyPerSGEnergyUnit;
+        return available;
     }
 
     @Override
@@ -222,10 +224,10 @@ public class TileEntityInductionCasing extends TileEntityMultiblock<Synchronized
     }
 
     @Override
-    public double drawEnergyDouble(double d) {
-        double available = this.getEnergy();
-        double supply = Math.min(this.getTransferCap(),Math.min(d, available));
-        this.setEnergy(this.getEnergy() - (supply));
+    public double drawEnergyDouble(double request) {
+        double available = totalAvailableEnergy() / energyPerSGEnergyUnit;
+        double requestedSupply = Math.min(request, available);
+        double supply = this.removeEnergy(requestedSupply * energyPerSGEnergyUnit, false);
         markDirty();
         return supply;
     }
