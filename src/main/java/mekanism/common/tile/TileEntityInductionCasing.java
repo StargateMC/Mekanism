@@ -213,7 +213,7 @@ public class TileEntityInductionCasing extends TileEntityMultiblock<Synchronized
 
     @Override
     public double availableEnergy() {
-        return (Math.min(this.getTransferCap()/100,getEnergy() / 100));
+        return (Math.min(this.getTransferCap(),getEnergy()));
     }
 
     @Override
@@ -225,7 +225,7 @@ public class TileEntityInductionCasing extends TileEntityMultiblock<Synchronized
     public double drawEnergyDouble(double d) {
         double available = this.getEnergy();
         double supply = Math.min(this.getTransferCap(),Math.min(d, available));
-        this.setEnergy(this.getEnergy() - (supply * 100));
+        this.setEnergy(this.getEnergy() - (supply));
         markDirty();
         return supply;
     }
