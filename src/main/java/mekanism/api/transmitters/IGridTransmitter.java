@@ -40,7 +40,7 @@ public interface IGridTransmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
 
     int getCapacity();
 
-    World world();
+    public World world();
 
     Coord4D coord();
 

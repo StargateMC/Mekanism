@@ -12,7 +12,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -73,27 +74,30 @@ public class TransmitterNetworkRegistry {
     }
 
     @SubscribeEvent
-    public void onTick(ServerTickEvent event) {
+    public void onTick(WorldTickEvent event) {
         if (event.phase == Phase.END && event.side == Side.SERVER) {
-            tickEnd();
+            tickEnd(event.world);
         }
     }
 
-    public void tickEnd() {
-        removeInvalidTransmitters();
-        assignOrphans();
-        commitChanges();
+    public void tickEnd(World w) {
+        removeInvalidTransmitters(w);
+        assignOrphans(w);
+        commitChanges(w);
         for (DynamicNetwork net : networks) {
-            net.tick();
+            if (net.getWorld() == w) {
+                net.tick();
+            }
         }
     }
 
-    public void removeInvalidTransmitters() {
+    public void removeInvalidTransmitters(World w) {
         if (MekanismAPI.debug && !invalidTransmitters.isEmpty()) {
             logger.info("Dealing with " + invalidTransmitters.size() + " invalid Transmitters");
         }
 
         for (IGridTransmitter invalid : invalidTransmitters) {
+            if (invalid.world()  != null && invalid.world() != w) continue;
             if (!(invalid.isOrphan() && invalid.isValid())) {
                 DynamicNetwork n = invalid.getTransmitterNetwork();
                 if (n != null) {
@@ -105,7 +109,7 @@ public class TransmitterNetworkRegistry {
         invalidTransmitters.clear();
     }
 
-    public void assignOrphans() {
+    public void assignOrphans(World w) {
         orphanTransmitters = new HashMap<>(newOrphanTransmitters);
         newOrphanTransmitters.clear();
 
@@ -114,6 +118,7 @@ public class TransmitterNetworkRegistry {
         }
 
         for (IGridTransmitter orphanTransmitter : new HashMap<>(orphanTransmitters).values()) {
+            if (orphanTransmitter.world() == null || orphanTransmitter.world() != w) continue;
             DynamicNetwork network = getNetworkFromOrphan(orphanTransmitter);
             if (network != null) {
                 networksToChange.add(network);
@@ -163,8 +168,9 @@ public class TransmitterNetworkRegistry {
         return null;
     }
 
-    public void commitChanges() {
+    public void commitChanges(World w) {
         for (DynamicNetwork network : networksToChange) {
+            if (network.getWorld() != w) continue;
             network.commit();
         }
         networksToChange.clear();
