@@ -108,12 +108,12 @@ public class TileComponentChunkLoader implements ITileComponent {
 
             if (canOperate() && chunkTicket == null) {
                 Ticket ticket;
-                //if (tileEntity instanceof ISecurityTile) {
-                 //   ticket = ForgeChunkManager.requestPlayerTicket(Mekanism.instance,
-                //          MekanismUtils.getLastKnownUsername(((ISecurityTile) tileEntity).getSecurity().getOwnerUUID()), tileEntity.getWorld(), Type.NORMAL);
-                //} else {
-                //    ticket = ForgeChunkManager.requestTicket(Mekanism.instance, tileEntity.getWorld(), Type.NORMAL);
-               // }
+                if (tileEntity instanceof ISecurityTile) {
+                    ticket = ForgeChunkManager.requestPlayerTicket(Mekanism.instance,
+                          MekanismUtils.getLastKnownUsername(((ISecurityTile) tileEntity).getSecurity().getOwnerUUID()), tileEntity.getWorld(), Type.NORMAL);
+                } else {
+                    ticket = ForgeChunkManager.requestTicket(Mekanism.instance, tileEntity.getWorld(), Type.NORMAL);
+                }
 
                 if (ticket != null) {
                     ticket.getModData().setInteger("x", tileEntity.getPos().getX());
