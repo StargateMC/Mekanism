@@ -655,31 +655,35 @@ public abstract class BlockBasic extends BlockTileDrops {
     @Nonnull
     @Override
     protected ItemStack getDropItem(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
-        BasicBlockType type = BasicBlockType.get(state);
-        ItemStack ret = new ItemStack(this, 1, state.getBlock().getMetaFromState(state));
-
-        if (type == BasicBlockType.BIN) {
-            TileEntityBin tileEntity = (TileEntityBin) world.getTileEntity(pos);
-            InventoryBin inv = new InventoryBin(ret);
-            ((ITierItem) ret.getItem()).setBaseTier(ret, tileEntity.tier.getBaseTier());
-            inv.setItemCount(tileEntity.getItemCount());
-            if (tileEntity.getItemCount() > 0) {
-                inv.setItemType(tileEntity.itemType);
-            }
-        } else if (type == BasicBlockType.INDUCTION_CELL) {
-            TileEntityInductionCell tileEntity = (TileEntityInductionCell) world.getTileEntity(pos);
-            ((ItemBlockBasic) ret.getItem()).setBaseTier(ret, tileEntity.tier.getBaseTier());
-        } else if (type == BasicBlockType.INDUCTION_PROVIDER) {
-            TileEntityInductionProvider tileEntity = (TileEntityInductionProvider) world.getTileEntity(pos);
-            ((ItemBlockBasic) ret.getItem()).setBaseTier(ret, tileEntity.tier.getBaseTier());
+        try {
+        	BasicBlockType type = BasicBlockType.get(state);
+	        ItemStack ret = new ItemStack(this, 1, state.getBlock().getMetaFromState(state));
+	        if (type == BasicBlockType.BIN) {
+	            TileEntityBin tileEntity = (TileEntityBin) world.getTileEntity(pos);
+	            InventoryBin inv = new InventoryBin(ret);
+	            ((ITierItem) ret.getItem()).setBaseTier(ret, tileEntity.tier.getBaseTier());
+	            inv.setItemCount(tileEntity.getItemCount());
+	            if (tileEntity.getItemCount() > 0) {
+	                inv.setItemType(tileEntity.itemType);
+	            }
+	        } else if (type == BasicBlockType.INDUCTION_CELL) {
+	            TileEntityInductionCell tileEntity = (TileEntityInductionCell) world.getTileEntity(pos);
+	            ((ItemBlockBasic) ret.getItem()).setBaseTier(ret, tileEntity.tier.getBaseTier());
+	        } else if (type == BasicBlockType.INDUCTION_PROVIDER) {
+	            TileEntityInductionProvider tileEntity = (TileEntityInductionProvider) world.getTileEntity(pos);
+	            ((ItemBlockBasic) ret.getItem()).setBaseTier(ret, tileEntity.tier.getBaseTier());
+	        }
+	
+	        TileEntity tileEntity = world.getTileEntity(pos);
+	        if (tileEntity instanceof IStrictEnergyStorage) {
+	            IEnergizedItem energizedItem = (IEnergizedItem) ret.getItem();
+	            energizedItem.setEnergy(ret, ((IStrictEnergyStorage) tileEntity).getEnergy());
+	        }
+        } catch (Exception e) {
+        	System.out.println("Failed to handle getDropItem for Mekanism item");
+        	return ItemStack.EMPTY;
         }
-
-        TileEntity tileEntity = world.getTileEntity(pos);
-        if (tileEntity instanceof IStrictEnergyStorage) {
-            IEnergizedItem energizedItem = (IEnergizedItem) ret.getItem();
-            energizedItem.setEnergy(ret, ((IStrictEnergyStorage) tileEntity).getEnergy());
-        }
-        return ret;
+	    return ret;
     }
 
     @Override
